@@ -1,4 +1,4 @@
-name: hello-branch
+name: check-if-must-deploy
 # Esta acción juega con los canales de comunicación de GITHUB_OUTPUT para comprobar si tiene que desplegarse o no, y saluda al nombre de la rama que está desplegando
 
 on:
