@@ -1,0 +1,27 @@
+name: Integration Pipeline
+# Comprueba con un action si existe un archivo, si existe, permite el push request, si no, lo corta
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Check file existence
+      id: check_files
+      uses: andstor/file-existence-action@v1
+      with:
+        files: "allow_push"
+
+    - name: File exists
+      if: steps.check_files.outputs.files_exists == 'true'
+      run: echo "It exists! Allowing pull request."
+
+    - name: File not exists
+      if: steps.check_files.outputs.files_exists != 'true'
+      run: echo "File doesn't exists. Not allow pull request." && exit 1

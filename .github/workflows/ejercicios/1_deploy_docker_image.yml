@@ -1,0 +1,32 @@
+name: Docker Image CI
+# Esta acción va a hacer checkout del código, inicializa un archivo con secretos
+
+on:
+  push:
+    branches:
+      - "master"
+      - "feature**"
+      - "hotfix**"
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Perform the SAST
+      run: echo "Making SAST test to the code"
+
+    - name: Create the creds file
+      env:
+        USERNAME: '${{ secrets.USERNAME }}'
+        PASSWORD: '${{ secrets.PASSWORD }}'
+      run: envsubst < credentials.ini.tpl > credentials.ini
+
+    - name: Show credentials
+      run: cat credentials.ini
+
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag devops_ws:$(date +%s)

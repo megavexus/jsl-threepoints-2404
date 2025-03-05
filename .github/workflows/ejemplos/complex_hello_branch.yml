@@ -1,0 +1,52 @@
+name: hello-branch
+# Esta acción juega con los canales de comunicación de GITHUB_OUTPUT para comprobar si tiene que desplegarse o no, y saluda al nombre de la rama que está desplegando
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check-if-branch-is-productive:
+    runs-on: ubuntu-latest
+    outputs:
+        DEPLOY: ${{ steps.allow_deploy.outputs.DEPLOY }}
+        BRANCH_TYPE: ${{ steps.branch_type_identificator.outputs.BRANCH_TYPE }}
+    steps:
+      - name: Is productive branch
+        if: ${{ github.ref_name == 'main' || contains(github.ref_name, 'hotfix') || contains(github.ref_name, 'patch') }}
+        run: |
+          echo "BRANCH_TYPE=PROD" >> $GITHUB_ENV
+          echo "Productive Branch ${{ github.ref_name }}"
+        
+      - name: Is DEV branch
+        if: ${{ github.ref_name!='main' && !contains(github.ref_name, 'hotfix') && !contains(github.ref_name, 'patch') }}
+        run: |
+          echo "BRANCH_TYPE=DEV" >> $GITHUB_ENV
+          echo "Development Branch ${{ github.ref_name }}"
+        
+      - name: Say hello to branch name
+        id: branch_type_identificator
+        env:
+          BRANCH_TYPE: ${{env.BRANCH_TYPE}}
+        run: | 
+          echo "BRANCH_TYPE=${BRANCH_TYPE}" >> $GITHUB_OUTPUT
+          echo "Hello branch name=${{github.ref_name}} with the TYPE=${BRANCH_TYPE}"
+      
+      - name: Check if must deploy
+        id: allow_deploy
+        if: ${{ env.BRANCH_TYPE == 'PROD' }}
+        run: echo "DEPLOY=true" >> $GITHUB_OUTPUT
+        env:
+          DEPLOY: true
+  
+  deploy-to-prod:
+    needs: check-if-branch-is-productive
+    runs-on: ubuntu-latest
+    steps: 
+    
+      - name: Deploy to production
+        if: ${{ needs.check-if-branch-is-productive.outputs.DEPLOY == 'true' }}
+        env:
+          BRANCH_TYPE: ${{needs.check-if-branch-is-productive.outputs.BRANCH_TYPE}}
+        run: echo "Uploading to production because branch is ${BRANCH_TYPE}"
