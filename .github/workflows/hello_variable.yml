@@ -8,9 +8,10 @@ jobs:
   Say-Hello:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Hello $PersonalName."
+      - name: "Say Hello!"
+        run: echo "Hello $PersonalName, is equal to ${{vars.MY_NAME}}."
         env:
-          PersonalName: '${{ env.MY_NAME }}'
+          PersonalName: '${{ vars.MY_NAME }}'
 
       - name: Check out repository code
         uses: actions/checkout@v4
