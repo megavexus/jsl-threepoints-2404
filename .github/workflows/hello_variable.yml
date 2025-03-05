@@ -1,4 +1,4 @@
-name: Learn Github Actions
+name: Say Hello - Variable
 run-name: ${{ MY_NAME }} is testing out GitHub Actions 🚀
 on: 
   push:
